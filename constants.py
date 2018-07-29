@@ -1,0 +1,4 @@
+class MatchInitializer:
+	OVERS_IN_MATCH = 4
+	RUNS_REQUIRED = 40
+	WICKETS_REMAINING = 3
