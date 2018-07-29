@@ -7,6 +7,9 @@ OUTCOME_FOR_WICKET = 'Out'
 ONE_BALL = 1
 
 class Match:
+	
+	commentary = []
+
 	def __init__(self, overs_remaining, runs_required, wickets_remaining, batting_team, bowling_team):
 		
 		self.overs = overs_remaining
@@ -29,12 +32,14 @@ class Match:
 		
 		return batsmen
 
-	def startMatch(self, striker, non_striker, current_batsmen, batsmen_played):
+	def playMatch(self, striker, non_striker, current_batsmen, batsmen_played):
+
 		match_won = False
+
 		for i in range(MatchInitializer.OVERS_IN_MATCH):
 			if not match_won:
-				print ()
-				print (self.overs, "overs left.", self.runs, "runs to win")
+				self.commentary.append(" ")
+				self.commentary.append(str(self.overs) + " overs left. " + str(self.runs) + " runs to win")
 				for j in range(FIRST_BALL,LAST_BALL+1):
 					if not match_won:
 						outcome = striker.getOutcome()[0]
@@ -42,20 +47,18 @@ class Match:
 							striker.runs += outcome
 							striker.balls_faced += ONE_BALL
 							self.runs -= outcome
-							print (str(i)+"."+str(j),striker, "scored", outcome)
+							self.commentary.append(str(i)+"."+str(j)+" "+striker.name+" scored "+str(outcome))
 							#Check for batting win here
 							if self.runs > 0:
 								if self.isOddScore(outcome):
-									temp = striker
-									striker = non_striker
-									non_striker = temp
+									striker, non_striker = non_striker, striker
 							else:
 								match_balls_played = (i*6) + j
 								balls_remaining = (MatchInitializer.OVERS_IN_MATCH*6) - match_balls_played
 								print ("\n<---"+ self.batting_team.name ,"won by", self.wickets, "wicket(s) and", balls_remaining, "balls remaining--->")
 								match_won = True
 						else:
-							print (str(i)+"."+str(j),striker, "is out")
+							self.commentary.append(str(i)+"."+str(j)+" "+ striker.name + " is out")
 							self.wickets -= 1
 							striker.status = "Out"
 							striker.balls_faced += 1
@@ -66,12 +69,21 @@ class Match:
 								print ("\n<---"+ self.bowling_team.name ,"won by", self.runs - 1 ,"runs--->")
 								match_won = True
 				self.overs -= 1
-				temp = striker
-				striker = non_striker
-				non_striker = temp 
-		if not match_won:
+				striker, non_striker = non_striker, striker
+		if not match_won and self.runs==1:
+			print ("The match is a tie! Whoooooo")
+		elif not match_won:
 			print ("\n<---"+ self.bowling_team.name ,"won by", self.runs - 1 ,"runs--->")
 		print ()
 
 	def isOddScore(self, outcome):
 		return outcome%2 != 0
+
+	def printSummary(self, batsmen_played):
+		for player in batsmen_played:
+			player.printDetails()
+
+	def printCommentary(self):
+		print ("\n***Commentary***")
+		for line in self.commentary:
+			print (line)
